@@ -118,46 +118,6 @@ h1 {
   font-size: 0.85rem;
 }
 
-/* API key row */
-.api-key-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.85rem;
-}
-
-.api-key-row label {
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.api-key-input {
-  flex: 1;
-  max-width: 280px;
-  padding: 0.4rem 0.6rem;
-  font-size: 0.85rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  outline: none;
-}
-
-.api-key-input:focus {
-  border-color: var(--accent);
-}
-
-.api-key-link {
-  color: var(--accent);
-  text-decoration: none;
-  font-size: 0.8rem;
-}
-
-.api-key-link:hover {
-  text-decoration: underline;
-}
-
 /* Results panel */
 .results-panel {
   margin-top: 1rem;

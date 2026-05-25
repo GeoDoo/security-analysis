@@ -1,6 +1,6 @@
 import type { FinancialData } from "../types";
 
-const FMP_BASE = "https://financialmodelingprep.com/api/v3";
+const YAHOO_BASE = "/api/yahoo";
 
 export class FinancialDataError extends Error {
   constructor(message: string) {
@@ -9,96 +9,91 @@ export class FinancialDataError extends Error {
   }
 }
 
-interface FMPProfile {
-  price: number;
-  mktCap: number;
-  sharesOutstanding?: number;
+interface YahooQuoteSummary {
+  quoteSummary: {
+    result: Array<{
+      price?: {
+        regularMarketPrice?: { raw: number };
+        marketCap?: { raw: number };
+      };
+      defaultKeyStatistics?: {
+        sharesOutstanding?: { raw: number };
+      };
+      financialData?: {
+        totalRevenue?: { raw: number };
+        freeCashflow?: { raw: number };
+        totalDebt?: { raw: number };
+        totalCash?: { raw: number };
+      };
+    }>;
+    error: unknown;
+  };
 }
 
-interface FMPIncomeStatement {
-  revenue: number;
-}
-
-interface FMPCashFlowStatement {
-  freeCashFlow: number;
-}
-
-interface FMPBalanceSheet {
-  totalDebt: number;
-  cashAndCashEquivalents: number;
-  cashAndShortTermInvestments: number;
-}
-
-async function fmpFetch<T>(path: string, apiKey: string): Promise<T> {
-  const url = `${FMP_BASE}${path}${path.includes("?") ? "&" : "?"}apikey=${apiKey}`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new FinancialDataError(`API request failed: ${res.status}`);
-  }
-  const data: unknown = await res.json();
-  return data as T;
-}
-
-export function computeNetDebt(sheet: FMPBalanceSheet): number {
-  const cash =
-    sheet.cashAndShortTermInvestments || sheet.cashAndCashEquivalents || 0;
-  return (sheet.totalDebt || 0) - cash;
-}
-
-export function buildFinancialData(
+export function parseYahooData(
   ticker: string,
-  profile: FMPProfile,
-  income: FMPIncomeStatement,
-  cashFlow: FMPCashFlowStatement,
-  balance: FMPBalanceSheet
+  raw: YahooQuoteSummary
 ): FinancialData {
-  const revenue = income.revenue;
-  const fcf = cashFlow.freeCashFlow;
+  const entry = raw.quoteSummary?.result?.[0];
+  if (!entry) {
+    throw new FinancialDataError(
+      `No data found for ticker "${ticker}"`
+    );
+  }
+
+  const price = entry.price?.regularMarketPrice?.raw;
+  if (price === undefined || price <= 0) {
+    throw new FinancialDataError(`Invalid price for "${ticker}"`);
+  }
+
   const shares =
-    profile.sharesOutstanding ??
-    (profile.price > 0 ? Math.round(profile.mktCap / profile.price) : 0);
+    entry.defaultKeyStatistics?.sharesOutstanding?.raw ??
+    (entry.price?.marketCap?.raw
+      ? Math.round(entry.price.marketCap.raw / price)
+      : 0);
+
+  const revenue = entry.financialData?.totalRevenue?.raw ?? 0;
+  const fcf = entry.financialData?.freeCashflow?.raw ?? 0;
+  const totalDebt = entry.financialData?.totalDebt?.raw ?? 0;
+  const totalCash = entry.financialData?.totalCash?.raw ?? 0;
+  const netDebt = totalDebt - totalCash;
 
   return {
     ticker,
-    price: profile.price,
+    price,
     sharesOutstanding: shares,
     revenue,
     freeCashFlow: fcf,
-    netDebt: computeNetDebt(balance),
+    netDebt,
     fcfMargin: revenue !== 0 ? fcf / revenue : 0,
   };
 }
 
 export async function fetchFinancialData(
-  ticker: string,
-  apiKey: string
+  ticker: string
 ): Promise<FinancialData> {
-  const [profiles, incomes, cashFlows, balances] = await Promise.all([
-    fmpFetch<FMPProfile[]>(`/profile/${ticker}`, apiKey),
-    fmpFetch<FMPIncomeStatement[]>(
-      `/income-statement/${ticker}?limit=1`,
-      apiKey
-    ),
-    fmpFetch<FMPCashFlowStatement[]>(
-      `/cash-flow-statement/${ticker}?limit=1`,
-      apiKey
-    ),
-    fmpFetch<FMPBalanceSheet[]>(
-      `/balance-sheet-statement/${ticker}?limit=1`,
-      apiKey
-    ),
-  ]);
+  const modules = [
+    "price",
+    "defaultKeyStatistics",
+    "financialData",
+  ].join(",");
 
-  const profile = profiles[0];
-  const income = incomes[0];
-  const cashFlow = cashFlows[0];
-  const balance = balances[0];
+  const url = `${YAHOO_BASE}/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules}`;
+  const res = await fetch(url);
 
-  if (!profile || !income || !cashFlow || !balance) {
+  if (!res.ok) {
     throw new FinancialDataError(
-      `No financial data found for ticker "${ticker}"`
+      `Failed to fetch data for "${ticker}" (HTTP ${res.status})`
     );
   }
 
-  return buildFinancialData(ticker, profile, income, cashFlow, balance);
+  const data: YahooQuoteSummary = await res.json();
+
+  if (data.quoteSummary?.error) {
+    throw new FinancialDataError(
+      `Yahoo Finance error for "${ticker}": ${JSON.stringify(data.quoteSummary.error)}`
+    );
+  }
+
+  return parseYahooData(ticker, data);
 }

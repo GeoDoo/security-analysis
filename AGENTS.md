@@ -16,7 +16,7 @@ Stack: **Vite + React + TypeScript**
 
 1. Read this file (`AGENTS.md`).
 2. Run `./init.sh` — installs deps, runs lint + typecheck + tests.
-3. Read `claude-progress.md` — what happened last session.
+3. Read `progress.md` — what happened last session.
 4. Read `feature_list.json` — what's done, what's next.
 5. Check `git log --oneline -10`.
 
@@ -36,7 +36,7 @@ Stack: **Vite + React + TypeScript**
 ### WRAP UP
 
 13. Update `feature_list.json` — set status to `"done"`, record evidence.
-14. Update `claude-progress.md` — what was done, what's next.
+14. Update `progress.md` — what was done, what's next.
 15. Commit with a message referencing the feature ID (e.g., `feat(F02): stock ticker input`).
 16. Leave a clean restart path for the next session.
 

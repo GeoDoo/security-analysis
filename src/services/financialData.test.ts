@@ -1,77 +1,75 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  buildFinancialData,
-  computeNetDebt,
+  parseYahooData,
   fetchFinancialData,
   FinancialDataError,
 } from "./financialData";
 
-const MOCK_PROFILE = {
-  price: 195.0,
-  mktCap: 3_000_000_000_000,
-  sharesOutstanding: 15_384_615_385,
+const MOCK_YAHOO_RESPONSE = {
+  quoteSummary: {
+    result: [
+      {
+        price: {
+          regularMarketPrice: { raw: 195 },
+          marketCap: { raw: 3_000_000_000_000 },
+        },
+        defaultKeyStatistics: {
+          sharesOutstanding: { raw: 15_400_000_000 },
+        },
+        financialData: {
+          totalRevenue: { raw: 383_000_000_000 },
+          freeCashflow: { raw: 110_000_000_000 },
+          totalDebt: { raw: 111_000_000_000 },
+          totalCash: { raw: 62_000_000_000 },
+        },
+      },
+    ],
+    error: null,
+  },
 };
 
-const MOCK_INCOME = { revenue: 383_000_000_000 };
-const MOCK_CASH_FLOW = { freeCashFlow: 110_000_000_000 };
-const MOCK_BALANCE = {
-  totalDebt: 111_000_000_000,
-  cashAndCashEquivalents: 30_000_000_000,
-  cashAndShortTermInvestments: 62_000_000_000,
-};
-
-describe("computeNetDebt", () => {
-  it("calculates totalDebt minus cashAndShortTermInvestments", () => {
-    expect(computeNetDebt(MOCK_BALANCE)).toBe(
-      111_000_000_000 - 62_000_000_000
-    );
-  });
-
-  it("falls back to cashAndCashEquivalents when short-term is zero", () => {
-    const sheet = { ...MOCK_BALANCE, cashAndShortTermInvestments: 0 };
-    expect(computeNetDebt(sheet)).toBe(111_000_000_000 - 30_000_000_000);
-  });
-
-  it("handles missing fields gracefully", () => {
-    expect(
-      computeNetDebt({
-        totalDebt: 0,
-        cashAndCashEquivalents: 0,
-        cashAndShortTermInvestments: 0,
-      })
-    ).toBe(0);
-  });
-});
-
-describe("buildFinancialData", () => {
-  it("assembles FinancialData from raw API responses", () => {
-    const result = buildFinancialData(
-      "AAPL",
-      MOCK_PROFILE,
-      MOCK_INCOME,
-      MOCK_CASH_FLOW,
-      MOCK_BALANCE
-    );
-
+describe("parseYahooData", () => {
+  it("parses a valid Yahoo Finance response", () => {
+    const result = parseYahooData("AAPL", MOCK_YAHOO_RESPONSE);
     expect(result.ticker).toBe("AAPL");
-    expect(result.price).toBe(195.0);
-    expect(result.sharesOutstanding).toBe(15_384_615_385);
+    expect(result.price).toBe(195);
+    expect(result.sharesOutstanding).toBe(15_400_000_000);
     expect(result.revenue).toBe(383_000_000_000);
     expect(result.freeCashFlow).toBe(110_000_000_000);
-    expect(result.netDebt).toBe(49_000_000_000);
+    expect(result.netDebt).toBe(111_000_000_000 - 62_000_000_000);
     expect(result.fcfMargin).toBeCloseTo(110 / 383, 4);
   });
 
-  it("derives shares from mktCap/price when sharesOutstanding missing", () => {
-    const profile = { price: 200, mktCap: 2_000_000_000_000 };
-    const result = buildFinancialData(
-      "TEST",
-      profile,
-      MOCK_INCOME,
-      MOCK_CASH_FLOW,
-      MOCK_BALANCE
+  it("derives shares from marketCap / price when sharesOutstanding missing", () => {
+    const data = structuredClone(MOCK_YAHOO_RESPONSE);
+    data.quoteSummary.result[0] = {
+      price: data.quoteSummary.result[0]!.price,
+      financialData: data.quoteSummary.result[0]!.financialData,
+    } as (typeof data.quoteSummary.result)[0];
+    const result = parseYahooData("TEST", data);
+    expect(result.sharesOutstanding).toBe(
+      Math.round(3_000_000_000_000 / 195)
     );
-    expect(result.sharesOutstanding).toBe(10_000_000_000);
+  });
+
+  it("throws when result array is empty", () => {
+    const empty = { quoteSummary: { result: [], error: null } };
+    expect(() => parseYahooData("ZZZZ", empty)).toThrow(FinancialDataError);
+  });
+
+  it("throws on invalid price", () => {
+    const data = structuredClone(MOCK_YAHOO_RESPONSE);
+    data.quoteSummary.result[0]!.price!.regularMarketPrice!.raw = 0;
+    expect(() => parseYahooData("BAD", data)).toThrow(FinancialDataError);
+  });
+
+  it("handles missing financialData fields gracefully", () => {
+    const data = structuredClone(MOCK_YAHOO_RESPONSE);
+    data.quoteSummary.result[0]!.financialData = {} as typeof data.quoteSummary.result[0]["financialData"];
+    const result = parseYahooData("MIN", data);
+    expect(result.revenue).toBe(0);
+    expect(result.freeCashFlow).toBe(0);
+    expect(result.netDebt).toBe(0);
   });
 });
 
@@ -80,41 +78,45 @@ describe("fetchFinancialData", () => {
     vi.restoreAllMocks();
   });
 
-  it("fetches and assembles data from FMP endpoints", async () => {
-    const mockFetch = vi.fn().mockImplementation((url: string) => {
-      let body: unknown;
-      if (url.includes("/profile/")) body = [MOCK_PROFILE];
-      else if (url.includes("/income-statement/")) body = [MOCK_INCOME];
-      else if (url.includes("/cash-flow-statement/")) body = [MOCK_CASH_FLOW];
-      else if (url.includes("/balance-sheet-statement/"))
-        body = [MOCK_BALANCE];
-      return Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
-    });
-    vi.stubGlobal("fetch", mockFetch);
-
-    const result = await fetchFinancialData("AAPL", "test-key");
-    expect(result.ticker).toBe("AAPL");
-    expect(result.price).toBe(195.0);
-    expect(mockFetch).toHaveBeenCalledTimes(4);
-  });
-
-  it("throws FinancialDataError when profile is empty", async () => {
+  it("fetches and parses Yahoo Finance data", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([]),
+      json: () => Promise.resolve(MOCK_YAHOO_RESPONSE),
     });
     vi.stubGlobal("fetch", mockFetch);
 
-    await expect(fetchFinancialData("ZZZZ", "test-key")).rejects.toThrow(
+    const result = await fetchFinancialData("AAPL");
+    expect(result.ticker).toBe("AAPL");
+    expect(result.price).toBe(195);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch.mock.calls[0]![0]).toContain("/api/yahoo/");
+  });
+
+  it("throws on HTTP error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 404 })
+    );
+    await expect(fetchFinancialData("ZZZZ")).rejects.toThrow(
       FinancialDataError
     );
   });
 
-  it("throws FinancialDataError on HTTP error", async () => {
-    const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 401 });
-    vi.stubGlobal("fetch", mockFetch);
-
-    await expect(fetchFinancialData("AAPL", "test-key")).rejects.toThrow(
+  it("throws when Yahoo returns an error object", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            quoteSummary: {
+              result: null,
+              error: { code: "Not Found", description: "No data" },
+            },
+          }),
+      })
+    );
+    await expect(fetchFinancialData("FAKE")).rejects.toThrow(
       FinancialDataError
     );
   });

@@ -3,4 +3,13 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      "/api/yahoo": {
+        target: "https://query2.finance.yahoo.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/yahoo/, ""),
+      },
+    },
+  },
 });
