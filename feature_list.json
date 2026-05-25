@@ -1,0 +1,38 @@
+[
+  {
+    "id": "F01",
+    "title": "Project scaffold — Vite + React + TypeScript",
+    "status": "done",
+    "evidence": "lint: 0 errors. typecheck: 0 errors. test: 1 passed (1 file). All green."
+  },
+  {
+    "id": "F02",
+    "title": "Stock ticker input UI",
+    "status": "done",
+    "evidence": "lint: 0 errors. typecheck: 0 errors. test: 1 passed. TickerInput component with loading/error states."
+  },
+  {
+    "id": "F03",
+    "title": "Financial data service",
+    "status": "pending",
+    "evidence": null
+  },
+  {
+    "id": "F04",
+    "title": "Reverse DCF calculation engine",
+    "status": "pending",
+    "evidence": null
+  },
+  {
+    "id": "F05",
+    "title": "Results display — implied growth + assumptions",
+    "status": "pending",
+    "evidence": null
+  },
+  {
+    "id": "F06",
+    "title": "Sensitivity analysis table",
+    "status": "pending",
+    "evidence": null
+  }
+]
