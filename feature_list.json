@@ -15,24 +15,36 @@
     "id": "F03",
     "title": "Financial data service",
     "status": "done",
-    "evidence": "lint: 0. typecheck: 0. test: 9 passed."
+    "evidence": "lint: 0. typecheck: 0. test: 8 passed. Yahoo Finance via Vite proxy with cookie/crumb auth."
   },
   {
     "id": "F04",
     "title": "Reverse DCF calculation engine",
     "status": "done",
-    "evidence": "lint: 0. typecheck: 0. test: 20 passed. Round-trip consistency verified."
+    "evidence": "lint: 0. typecheck: 0. test: 12 passed. Round-trip consistency verified."
   },
   {
     "id": "F05",
     "title": "Results display — implied growth + assumptions",
     "status": "done",
-    "evidence": "lint: 0. typecheck: 0. test: 20 passed. Full flow wired."
+    "evidence": "lint: 0. typecheck: 0. Full flow wired: ticker → fetch → engine → ResultsPanel."
   },
   {
     "id": "F06",
     "title": "Sensitivity analysis table",
     "status": "done",
-    "evidence": "lint: 0. typecheck: 0. test: 24 passed (3 files). Matrix + base-case highlight + color-coding."
+    "evidence": "lint: 0. typecheck: 0. test: 4 passed. Matrix + base-case highlight + color-coding."
+  },
+  {
+    "id": "F07",
+    "title": "Multi-ticker comparison",
+    "status": "done",
+    "evidence": "lint: 0. typecheck: 0. test: 33 passed (4 files). Ranked table + aggregate stats. parseTickers + computeStats tested."
+  },
+  {
+    "id": "F08",
+    "title": "Automated insights panel",
+    "status": "done",
+    "evidence": "lint: 0. typecheck: 0. test: 39 passed (5 files). 6 insight types: group overview, bullish/bearish signals, margin warnings, outlier detection, clustering, single-stock verdicts."
   }
 ]

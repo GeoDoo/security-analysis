@@ -3,6 +3,7 @@ import TickerInput from "./components/TickerInput";
 import ResultsPanel from "./components/ResultsPanel";
 import SensitivityTable from "./components/SensitivityTable";
 import ComparisonTable from "./components/ComparisonTable";
+import InsightsPanel from "./components/InsightsPanel";
 import { fetchFinancialData } from "./services/financialData";
 import { reverseDCF } from "./engine/reverseDcf";
 import type { ComparisonEntry } from "./types";
@@ -81,6 +82,8 @@ export default function App() {
       </header>
 
       <TickerInput onSubmit={handleSubmit} loading={loading} error={error} />
+
+      {entries.length > 0 && <InsightsPanel entries={entries} />}
 
       {entries.length > 1 && (
         <ComparisonTable entries={entries} onSelect={setSelected} />
