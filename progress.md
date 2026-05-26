@@ -3,7 +3,7 @@
 ## Session 2 — 2026-05-26
 
 ### Completed
-- **F07**: Multi-ticker comparison — comma/space-separated input, ranked table sorted by implied growth, aggregate stats (mean, median, range), click-to-drill-down
+- **F07**: Multi-ticker comparison — comma/space-separated input, ranked table sorted by implied growth, aggregate stats (mean, median, range), click-to-drill-down, colour legend (green ≤15%, amber 15–25%, red >25%)
 - **F08**: Automated insights panel — generates contextual analysis from data: group overview, conservative/aggressive pricing signals, low-FCF-margin warnings, outlier detection, tight clustering, single-stock verdicts
 
 ### Verification

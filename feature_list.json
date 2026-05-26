@@ -39,7 +39,7 @@
     "id": "F07",
     "title": "Multi-ticker comparison",
     "status": "done",
-    "evidence": "lint: 0. typecheck: 0. test: 33 passed (4 files). Ranked table + aggregate stats. parseTickers + computeStats tested."
+    "evidence": "lint: 0. typecheck: 0. test: 33 passed (4 files). Ranked table + aggregate stats + colour legend. parseTickers + computeStats tested."
   },
   {
     "id": "F08",

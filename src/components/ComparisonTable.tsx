@@ -107,6 +107,21 @@ export default function ComparisonTable({
           </tbody>
         </table>
       </div>
+
+      <div className="legend">
+        <span className="legend-item">
+          <span className="legend-dot" style={{ background: "var(--success)" }} />
+          ≤15% — conservative
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot" style={{ background: "var(--warning)" }} />
+          15–25% — moderate
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot" style={{ background: "var(--danger)" }} />
+          &gt;25% — aggressive
+        </span>
+      </div>
     </section>
   );
 }
