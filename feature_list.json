@@ -46,5 +46,11 @@
     "title": "Automated insights panel",
     "status": "done",
     "evidence": "lint: 0. typecheck: 0. test: 39 passed (5 files). 6 insight types: group overview, bullish/bearish signals, margin warnings, outlier detection, clustering, single-stock verdicts."
+  },
+  {
+    "id": "F09",
+    "title": "Input validation guardrails",
+    "status": "done",
+    "evidence": "lint: 0. typecheck: 0. test: 46 passed (6 files). Validates FCF > 0, revenue > 0, shares > 0, price > 0. Skipped stocks shown with reason. 7 unit tests for validation."
   }
 ]

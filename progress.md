@@ -5,9 +5,10 @@
 ### Completed
 - **F07**: Multi-ticker comparison — comma/space-separated input, ranked table sorted by implied growth, aggregate stats (mean, median, range), click-to-drill-down, colour legend (green ≤15%, amber 15–25%, red >25%)
 - **F08**: Automated insights panel — generates contextual analysis from data: group overview, conservative/aggressive pricing signals, low-FCF-margin warnings, outlier detection, tight clustering, single-stock verdicts
+- **F09**: Input validation guardrails — stocks with negative FCF, zero revenue, or missing data are skipped with a clear reason instead of showing nonsensical results
 
 ### Verification
-- All 39 tests pass across 5 test files
+- All 46 tests pass across 6 test files
 - Lint: 0 errors
 - Typecheck: 0 errors
 

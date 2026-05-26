@@ -38,6 +38,11 @@ export interface ComparisonEntry {
   result: ReverseDCFResult;
 }
 
+export interface SkippedEntry {
+  ticker: string;
+  reasons: string[];
+}
+
 export interface ComparisonStats {
   mean: number;
   median: number;
