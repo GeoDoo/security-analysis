@@ -35,7 +35,7 @@ body {
 }
 
 #root {
-  max-width: 960px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
@@ -69,7 +69,7 @@ h1 {
 
 .ticker-input {
   flex: 1;
-  max-width: 240px;
+  max-width: 400px;
   padding: 0.6rem 0.8rem;
   font-size: 1rem;
   font-family: var(--font-mono);
@@ -283,6 +283,92 @@ h1 {
   font-weight: 700;
   outline: 2px solid var(--accent);
   outline-offset: -2px;
+}
+
+/* Comparison table */
+.comparison {
+  margin-bottom: 2rem;
+}
+
+.comparison h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.comparison-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.comparison-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 0.5rem 0.6rem;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-table th {
+  text-align: right;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 2px solid var(--border);
+}
+
+.comparison-table th:first-child,
+.comparison-table td:first-child {
+  text-align: center;
+  width: 2rem;
+}
+
+.comparison-table th:nth-child(2),
+.comparison-table td:nth-child(2) {
+  text-align: left;
+}
+
+.comparison-row {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.comparison-row:hover {
+  background: var(--surface);
+}
+
+.rank {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.ticker-cell {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.growth-cell {
+  font-family: var(--font-mono);
+  font-weight: 700;
 }
 
 .text-secondary {

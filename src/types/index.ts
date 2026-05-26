@@ -32,3 +32,16 @@ export interface SensitivityCell {
   terminalGrowthRate: number;
   impliedGrowthRate: number | null;
 }
+
+export interface ComparisonEntry {
+  data: FinancialData;
+  result: ReverseDCFResult;
+}
+
+export interface ComparisonStats {
+  mean: number;
+  median: number;
+  min: number;
+  max: number;
+  count: number;
+}

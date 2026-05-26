@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 
 interface TickerInputProps {
-  onSubmit: (ticker: string) => void;
+  onSubmit: (tickers: string[]) => void;
   loading: boolean;
   error: string | null;
 }
@@ -15,8 +15,12 @@ export default function TickerInput({
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const ticker = value.trim().toUpperCase();
-    if (ticker) onSubmit(ticker);
+    const tickers = value
+      .toUpperCase()
+      .split(/[\s,]+/)
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0 && /^[A-Z.]+$/.test(t));
+    if (tickers.length > 0) onSubmit(tickers);
   }
 
   return (
@@ -27,8 +31,7 @@ export default function TickerInput({
           className="ticker-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="AAPL"
-          maxLength={10}
+          placeholder="AAPL, MSFT, GOOG"
           disabled={loading}
           autoFocus
         />
